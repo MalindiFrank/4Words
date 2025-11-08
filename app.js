@@ -1,72 +1,67 @@
-+
-  (function () {
+(async function () {
+  
+  let index = 0;
+  const bgColors = await getColors();
+  const words = await getWords();
+  const hammertime = await new Hammer(document.querySelector("body"));
 
-  let words = [
-    { word: "leal", definition: "faithful, true, loyal", figure: "adj." },
-    { word: "isolophilia", definition: "strong affection for solitude / being alone", figure: "n." },
-    { word: "phosphenes", definition: "the colors or 'stars' you see when you rub your eyes ", figure: "n." },
-    { word: "meraki", definition: "to do something with soul, creativiy, or love", figure: "v." },
-  ];
-
-  const bgColors = [
-    { background: "#f4f0ea", color: "#544b43", },
-    { background: "#aa5a2e", color: "#f5f3f3", },
-    { background: "#dfc7a9", color: " #544b43", },
-    { background: "#533320", color: "#d3cfcb", },
-    { background: "#373737", color: "#d3cfcb", },
-    { background: "#b5a886", color: "#544b43", },
-    { background: "#d418d4", color: "#ffffff" },
-    { background: "#81ad6c", color: "#ffffff" },
-    { background: "#6ca0ad", color: "#ffffff" },
-    { background: "#c764a6", color: "#ffffff" },
-    { background: "#c76464", color: "#413f3f" },
-    { background: "#c76471", color: "#ffffff" },
-    { background: "#cab058", color: "#252525" },
-  ];
-
-  let vars = {
-    wordIndex: 0,
+  let el = {
+    loader: document.querySelector(".loader"),
+    wordCount: document.querySelector(".word-count"),
     randomIndex: Math.floor(Math.random() * bgColors.length),
-    helpMsgEl: document.querySelector(".help"),
-    wordCountEl: document.querySelector(".word-count"),
+  }
+
+  async function getColors() {
+    try {
+      const response = await fetch("https://fourapi.onrender.com/colors")
+      const data = await response.json();
+      return data.data;
+    } catch (error) {
+      console.log("Error fetching bg colors:", error);
+      htmlTag.loader.textContent =
+        "Site can't be reached, check the connection and reload.";
+    }
+  }
+
+  async function getWords() {
+    try {
+      const response = await fetch("https://fourapi.onrender.com/words/random/4")
+      const data = await response.json();
+      return data.data;
+    } catch (error) {
+      console.log("Error fetching 4words:", error)
+    }
   }
 
   function setWord(word) {
-    document.querySelector(".word").textContent = word.word;
+    el.loader.style.display = "none";
+    document.querySelector(".word").textContent = word.name;
     document.querySelector(".figure").textContent = `(${word.figure})`;
     document.querySelector(".definition").textContent = word.definition;
   };
 
   function setRandomBg(arr) {
-    document.body.style.backgroundColor = arr[vars.randomIndex].background;
-    document.body.style.color = arr[vars.randomIndex].color;
+    document.body.style.backgroundColor = arr[el.randomIndex].background;
+    document.body.style.color = arr[el.randomIndex].color;
   };
-
-  function helpMsg(txt) {
-    vars.helpMsgEl.textContent = txt;
-    setTimeout(() => vars.helpMsgEl.remove(), 2999);
-  };
-
-  const hammertime = new Hammer(document.querySelector("body"));
 
   hammertime.on("doubletap", () => setRandomBg(bgColors));
 
   hammertime.on("swiperight", function () {
-    if (vars.wordIndex == 0) vars.wordIndex = words.length - 1; else vars.wordIndex--;
-    setWord(words[vars.wordIndex]);
-    vars.wordCountEl.textContent = `${vars.wordIndex + 1} of 4`;
+    if (index == 0) index = words.length - 1; else index--;
+    setWord(words[index]);
+    el.wordCount.textContent = `${index + 1} of 4`;
   });
 
   hammertime.on("swipeleft", function () {
-    if (vars.wordIndex >= 3) vars.wordIndex = 0; else vars.wordIndex++;
-    setWord(words[vars.wordIndex]);
-    vars.wordCountEl.textContent = `${vars.wordIndex + 1} of 4`;
+    if (index >= 3) index = 0; else index++;
+    setWord(words[index]);
+    el.wordCount.textContent = `${index + 1} of 4`;
   });
 
   document.addEventListener("DOMContentLoaded", () => {
-    setWord(words[vars.wordIndex]);
+    setWord(words[index]);
     setRandomBg(bgColors);
-    helpMsg('< swipe & tap >');
   });
 
 })();
