@@ -18,8 +18,8 @@ main {
 
 main p {
   letter-spacing: .15rem;
-  font-weight: 400;
-  line-height: 1.3;
+  font-weight: 500;
+  line-height: 1.5;
 }
 
 main .word {
@@ -37,8 +37,8 @@ footer {
 footer p {
   left: 50%;
   bottom: 3%;
-  opacity: .3;
-  font-size: .7rem;
+  opacity: .5;
+  font-size: .9rem;
   padding: 1.2rem;
   position: absolute;
   translate: -50% -50%;
