@@ -1,6 +1,6 @@
 {
-  "name": "4wordsaday",
-  "short_name": "4words",
+  "name": "4-Words-A-Day",
+  "short_name": "4Words",
   "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#EEF0F4",
