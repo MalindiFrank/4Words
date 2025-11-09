@@ -1,67 +1,74 @@
 (async function () {
-  
-  let index = 0;
-  const bgColors = await getColors();
-  const words = await getWords();
-  const hammertime = await new Hammer(document.querySelector("body"));
 
+  let index = 0;
+  let bgColors = await getColors();
+  let words = await getWords();
+  
   let el = {
     loader: document.querySelector(".loader"),
-    wordCount: document.querySelector(".word-count"),
-    randomIndex: Math.floor(Math.random() * bgColors.length),
-  }
-
+    counter: document.querySelector(".word-count"),
+    word: document.querySelector('.word'),
+    figure: document.querySelector('.figure'),
+    definition: document.querySelector('.definition'),
+  };
+  
+  const hammertime = new Hammer(document.body);
+  
   async function getColors() {
     try {
-      const response = await fetch("https://fourapi.onrender.com/colors")
-      const data = await response.json();
-      return data.data;
-    } catch (error) {
-      console.log("Error fetching bg colors:", error);
-      htmlTag.loader.textContent =
-        "Site can't be reached, check the connection and reload.";
+      const res = await fetch('https://fourapi.onrender.com/colors');
+      const data = await res.json();
+      return Array.isArray(data?.data) ? data.data : [];
+    } catch (err) {
+      console.error('Error fetching bg colors:', err);
+      if (el.loader) el.loader.textContent = "Can't load colors — check connection.";
+      return [];
     }
   }
 
   async function getWords() {
     try {
-      const response = await fetch("https://fourapi.onrender.com/words/random/4")
-      const data = await response.json();
-      return data.data;
-    } catch (error) {
-      console.log("Error fetching 4words:", error)
+      const res = await fetch('https://fourapi.onrender.com/words/random/4');
+      const data = await res.json();
+      return Array.isArray(data?.data) ? data.data : [];
+    } catch (err) {
+      console.error('Error fetching words:', err);
+      if (el.loader) el.loader.textContent = "Can't load words — check connection.";
+      return [];
     }
   }
 
   function setWord(word) {
-    el.loader.style.display = "none";
-    document.querySelector(".word").textContent = word.name;
-    document.querySelector(".figure").textContent = `(${word.figure})`;
-    document.querySelector(".definition").textContent = word.definition;
-  };
+    if (!el.loader || !el.word || !el.figure || !el.definition) return;
+    el.loader.style.display = 'none';
+    el.word.textContent = word.name ?? '—';
+    el.figure.textContent = word.figure ? `(${word.figure})` : '';
+    el.definition.textContent = word.definition ?? '';
+  }
 
-  function setRandomBg(arr) {
-    document.body.style.backgroundColor = arr[el.randomIndex].background;
-    document.body.style.color = arr[el.randomIndex].color;
-  };
+  function setRandomBgColor(array) {
+    if (!Array.isArray(array) || array.length === 0) return;
+    let randomIndex = Math.floor(Math.random() * bgColors.length);
+    document.body.style.backgroundColor = array[randomIndex].bg;
+    document.body.style.color = array[randomIndex].color;
+  }
 
-  hammertime.on("doubletap", () => setRandomBg(bgColors));
-
-  hammertime.on("swiperight", function () {
-    if (index == 0) index = words.length - 1; else index--;
+  function handleSwipe(direction) {
+    if (!Array.isArray(words) || words.length === 0) return;
+    const last = words.length - 1;
+    if (direction > 0) {
+      index = index === 0 ? last : --index;
+    } else {
+      index = index === last ? 0 : ++index;
+    }
     setWord(words[index]);
-    el.wordCount.textContent = `${index + 1} of 4`;
-  });
+    if (el.counter) el.counter.textContent = `${index + 1} of ${words.length}`;
+  }
 
-  hammertime.on("swipeleft", function () {
-    if (index >= 3) index = 0; else index++;
-    setWord(words[index]);
-    el.wordCount.textContent = `${index + 1} of 4`;
-  });
+  hammertime.on("doubletap", () => setRandomBgColor(bgColors));
+  hammertime.on("swiperight", () => handleSwipe(1));
+  hammertime.on("swipeleft", () => handleSwipe(-1));
 
-  document.addEventListener("DOMContentLoaded", () => {
-    setWord(words[index]);
-    setRandomBg(bgColors);
-  });
-
+  if (bgColors.length) setRandomBgColor(bgColors);
+  setWord(words[index]);
 })();
