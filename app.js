@@ -3,7 +3,7 @@
   let index = 0;
   let bgColors = await getColors();
   let words = await getWords();
-  
+
   let el = {
     loader: document.querySelector(".loader"),
     counter: document.querySelector(".word-count"),
@@ -11,9 +11,9 @@
     figure: document.querySelector('.figure'),
     definition: document.querySelector('.definition'),
   };
-  
+
   const hammertime = new Hammer(document.body);
-  
+
   async function getColors() {
     try {
       const res = await fetch('https://fourapi.onrender.com/colors');
